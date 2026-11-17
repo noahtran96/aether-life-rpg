@@ -1,1 +1,66 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-void-950: #05060f;
+  --color-void-900: #0a0d1f;
+  --color-void-800: #111633;
+
+  --color-neon-cyan: #22d3ee;
+  --color-neon-purple: #a855f7;
+  --color-neon-magenta: #ec4899;
+  --color-neon-emerald: #10b981;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-void-950);
+    background-image:
+      radial-gradient(
+        circle at 15% 20%,
+        rgba(168, 85, 247, 0.14),
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 85% 75%,
+        rgba(34, 211, 238, 0.12),
+        transparent 42%
+      ),
+      radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      100% 100%,
+      36px 36px;
+    min-height: 100vh;
+  }
+}
+
+/* Reusable Cosmic Glass & Neon Utilities */
+.cosmic-card {
+  background: rgba(17, 22, 51, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 8px 32px rgba(2, 4, 15, 0.65);
+}
+
+.cosmic-card-hover {
+  transition: all 0.2s ease;
+}
+
+.cosmic-card-hover:hover {
+  border-color: rgba(34, 211, 238, 0.45);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.16);
+  transform: translateY(-1px);
+}
+
+.neon-glow-cyan {
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+}
+
+.neon-glow-purple {
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.35);
+}
