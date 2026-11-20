@@ -1,13 +1,34 @@
 import { useState } from "react";
 import "./index.css";
 import Navbar from "./components/Navbar";
+import AuthScreen from "./components/AuthScreen";
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [callsign, setCallsign] = useState("Cosmic Traveler");
   const [activeTab, setActiveTab] = useState("deck");
+
+  const handleLoginSuccess = (userCallsign: string) => {
+    setCallsign(userCallsign);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return <AuthScreen onLoginSuccess={handleLoginSuccess} />;
+  }
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top HUD navigation */}
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        callsign={callsign}
+        onLogout={handleLogout}
+      />
 
       {/* Main content area */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
@@ -18,7 +39,7 @@ export default function App() {
               Orbital Sync Active
             </span>
             <h2 className="text-lg font-bold text-slate-100">
-              Welcome back, Traveler
+              Welcome back, {callsign}
             </h2>
             <p className="text-xs text-slate-400">
               Complete daily life quests to sustain your trajectory.
