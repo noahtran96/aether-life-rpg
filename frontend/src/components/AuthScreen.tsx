@@ -9,7 +9,7 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
   const [callsign, setCallsign] = useState("Cosmic Traveler");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onLoginSuccess(callsign.trim() || "CosmicTraveler");
