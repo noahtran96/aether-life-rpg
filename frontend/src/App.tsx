@@ -1,25 +1,75 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.css";
 import Navbar from "./components/Navbar";
 import AuthScreen from "./components/AuthScreen";
+import CommandDeck from "./components/CommandDeck";
+import { INITIAL_QUESTS, type Quest } from "./types/quest";
+
+const STORAGE_KEYS = {
+  AUTH: "aether_is_authenticated",
+  CALLSIGN: "aether_callsign",
+  QUESTS: "aether_quests",
+};
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [callsign, setCallsign] = useState("Cosmic Traveler");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem(STORAGE_KEYS.AUTH) === "true";
+  });
+  const [callsign, setCallsign] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEYS.CALLSIGN) || "Cosmic Traveler";
+  });
   const [activeTab, setActiveTab] = useState("deck");
+  const [quests, setQuests] = useState<Quest[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.QUESTS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return INITIAL_QUESTS;
+      }
+    }
+    return INITIAL_QUESTS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.QUESTS, JSON.stringify(quests));
+  }, [quests]);
+
+  const earnedXp = quests
+    .filter((quest) => quest.completed)
+    .reduce((sum, quest) => sum + quest.xpReward, 0);
+  const totalXp = 40 + earnedXp;
+
+  const currentLevel = Math.floor(totalXp / 100) + 1;
+  const xpInCurrentLevel = totalXp % 100;
+
+  const handleToggleQuest = (questId: string) => {
+    setQuests((prev) =>
+      prev.map((quest) =>
+        quest.id === questId
+          ? { ...quest, completed: !quest.completed }
+          : quest,
+      ),
+    );
+  };
 
   const handleLoginSuccess = (userCallsign: string) => {
     setCallsign(userCallsign);
     setIsAuthenticated(true);
+    localStorage.setItem(STORAGE_KEYS.AUTH, "true");
+    localStorage.setItem(STORAGE_KEYS.CALLSIGN, userCallsign);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem(STORAGE_KEYS.AUTH);
+    localStorage.removeItem(STORAGE_KEYS.CALLSIGN);
   };
 
   if (!isAuthenticated) {
     return <AuthScreen onLoginSuccess={handleLoginSuccess} />;
   }
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top HUD navigation */}
@@ -35,9 +85,14 @@ export default function App() {
         {/* XP quick status banner */}
         <section className="cosmic-card rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-left">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
-              Orbital Sync Active
-            </span>
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+                Orbital Sync Active
+              </span>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-purple-300 bg-purple-500/15 px-2.5 py-0.5 rounded-full border border-purple-500/30">
+                LVL {String(currentLevel).padStart(2, "0")}
+              </span>
+            </div>
             <h2 className="text-lg font-bold text-slate-100">
               Welcome back, {callsign}
             </h2>
@@ -48,11 +103,16 @@ export default function App() {
 
           <div className="w-full sm:w-64 space-y-2 bg-void-950/60 p-3 rounded-xl border border-white/5">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-slate-400">LVL 01 PROGRESS</span>
-              <span className="text-cyan-300">40 / 100 XP</span>
+              <span className="text-slate-400">
+                LVL {String(currentLevel).padStart(2, "0")} PROGRESS
+              </span>
+              <span className="text-cyan-300">{xpInCurrentLevel} / 100 XP</span>
             </div>
             <div className="h-2 w-full rounded-full bg-void-900 overflow-hidden border border-white/10">
-              <div className="h-full w-2/5 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 neon-glow-cyan" />
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 neon-glow-cyan transition-all duration-500"
+                style={{ width: `${xpInCurrentLevel}%` }}
+              />
             </div>
           </div>
         </section>
@@ -82,6 +142,10 @@ export default function App() {
             </div>
           )}
         </section>
+        <CommandDeck
+          quests={INITIAL_QUESTS}
+          onToggleQuest={handleToggleQuest}
+        />
       </main>
     </div>
   );
