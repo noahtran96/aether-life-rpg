@@ -5,11 +5,13 @@ import AuthScreen from "./components/AuthScreen";
 import CommandDeck from "./components/CommandDeck";
 import { INITIAL_QUESTS, type Quest } from "./types/quest";
 import DeployQuestModal from "./components/DeployQuestModal";
+import { AstralVault } from "./components/AstralVault";
 
 const STORAGE_KEYS = {
   AUTH: "aether_is_authenticated",
   CALLSIGN: "aether_callsign",
   QUESTS: "aether_quests",
+  SPENT_XP: "aether_spent_xp",
 };
 
 export default function App() {
@@ -33,9 +35,18 @@ export default function App() {
     return INITIAL_QUESTS;
   });
 
+  const [spentXp, setSpentXp] = useState<number>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.SPENT_XP);
+    return saved ? Number(saved) : 0;
+  });
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.QUESTS, JSON.stringify(quests));
   }, [quests]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SPENT_XP, String(spentXp));
+  }, [spentXp]);
 
   const earnedXp = quests
     .filter((quest) => quest.completed)
@@ -57,6 +68,10 @@ export default function App() {
 
   const handleAddQuest = (newQuest: Quest) => {
     setQuests((prev) => [newQuest, ...prev]);
+  };
+
+  const handleRedeemReward = (rewardCost: number) => {
+    setSpentXp((prev) => prev + rewardCost);
   };
 
   const handleLoginSuccess = (userCallsign: string) => {
@@ -131,18 +146,11 @@ export default function App() {
             onOpenDeployModal={() => setIsDeployModalOpen(true)}
           />
         ) : (
-          <section className="cosmic-card rounded-2xl p-6 min-h-[320px] flex items-center justify-center text-center">
-            <div className="space-y-2">
-              <h3 className="text-base font-mono font-semibold text-purple-300">
-                Astral Vault View
-              </h3>
-              <p className="text-sm text-slate-400 max-w-md">
-                Titles, achievements, and personal rewards catalog will be
-                displayed here in ticket{" "}
-                <span className="text-white font-mono">AETH-007-FE</span>
-              </p>
-            </div>
-          </section>
+          <AstralVault
+            currentTotalXp={totalXp}
+            spentXp={spentXp}
+            onRedeemReward={handleRedeemReward}
+          />
         )}
       </main>
 
