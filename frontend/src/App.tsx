@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import AuthScreen from "./components/AuthScreen";
 import CommandDeck from "./components/CommandDeck";
 import { INITIAL_QUESTS, type Quest } from "./types/quest";
+import DeployQuestModal from "./components/DeployQuestModal";
 
 const STORAGE_KEYS = {
   AUTH: "aether_is_authenticated",
@@ -19,6 +20,7 @@ export default function App() {
     return localStorage.getItem(STORAGE_KEYS.CALLSIGN) || "Cosmic Traveler";
   });
   const [activeTab, setActiveTab] = useState("deck");
+  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
   const [quests, setQuests] = useState<Quest[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.QUESTS);
     if (saved) {
@@ -51,6 +53,10 @@ export default function App() {
           : quest,
       ),
     );
+  };
+
+  const handleAddQuest = (newQuest: Quest) => {
+    setQuests((prev) => [newQuest, ...prev]);
   };
 
   const handleLoginSuccess = (userCallsign: string) => {
@@ -118,18 +124,14 @@ export default function App() {
         </section>
 
         {/* Dynamic tab view content */}
-        <section className="cosmic-card rounded-2xl p-6 min-h-[320px] flex items-center justify-center text-center">
-          {activeTab === "deck" ? (
-            <div className="space-y-2">
-              <h3 className="text-base font-mono font-semibold text-cyan-300">
-                Command Deck View
-              </h3>
-              <p className="text-sm text-slate-400 max-w-md">
-                Quest list and daily life missions will be loaded here in ticket{" "}
-                <span className="text-white font-mono">AETH-005-FE</span>
-              </p>
-            </div>
-          ) : (
+        {activeTab === "deck" ? (
+          <CommandDeck
+            quests={quests}
+            onToggleQuest={handleToggleQuest}
+            onOpenDeployModal={() => setIsDeployModalOpen(true)}
+          />
+        ) : (
+          <section className="cosmic-card rounded-2xl p-6 min-h-[320px] flex items-center justify-center text-center">
             <div className="space-y-2">
               <h3 className="text-base font-mono font-semibold text-purple-300">
                 Astral Vault View
@@ -140,13 +142,16 @@ export default function App() {
                 <span className="text-white font-mono">AETH-007-FE</span>
               </p>
             </div>
-          )}
-        </section>
-        <CommandDeck
-          quests={INITIAL_QUESTS}
-          onToggleQuest={handleToggleQuest}
-        />
+          </section>
+        )}
       </main>
+
+      {/* Deploy new directive modal */}
+      <DeployQuestModal
+        isOpen={isDeployModalOpen}
+        onClose={() => setIsDeployModalOpen(false)}
+        onAddQuest={handleAddQuest}
+      />
     </div>
   );
 }

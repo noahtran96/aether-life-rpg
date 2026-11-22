@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 interface CommandDeckProps {
   quests: Quest[];
   onToggleQuest: (questId: string) => void;
+  onOpenDeployModal: () => void;
 }
 
 const DIFFICULTY_STYLES: Record<QuestDifficulty, string> = {
@@ -25,6 +26,7 @@ const CATEGORY_STYLES: Record<QuestCategory, string> = {
 export default function CommandDeck({
   quests,
   onToggleQuest,
+  onOpenDeployModal,
 }: CommandDeckProps) {
   const [statusFilter, setStatusFilter] = useState<
     "ALL" | "ACTIVE" | "COMPLETED"
@@ -58,6 +60,31 @@ export default function CommandDeck({
           </p>
         </div>
 
+        {/* Deploy directive CTA button */}
+        <button
+          onClick={onOpenDeployModal}
+          className="px-4 py-2 rounded-xl text-xs font-mono font-bold text-void-950 bg-cyan-400 hover:bg-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all cursor-pointer self-start sm:self-auto"
+        >
+          + Deploy Directive
+        </button>
+      </div>
+
+      {/* Filter bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-void-950/40 p-3 rounded-2xl border border-white/10">
+        {/* Category filter bar */}
+        <div className="flex flex-wrap items-center gap-2">
+          {(["ALL", "DAILY", "MAIN", "SIDE"] as const).map((category) => (
+            <button
+              key={category}
+              onClick={() => setCategoryFilter(category)}
+              className={`px-3 py-1 rounded-full text-[11px] font-mono border transition-all cursor-pointer ${categoryFilter === category ? "bg-purple-500/20 text-purple-200 border-purple-400/50 neon-glow-purple" : "bg-void-900/50 text-slate-400 border-white/10 hover:border-white/25"}`}
+            >
+              {" "}
+              {category === "ALL" ? "All Sectors" : `${category} Quests`}
+            </button>
+          ))}
+        </div>
+
         {/* Status filter pills */}
         <div className="flex items-center gap-1 bg-void-950/70 p-1 rounded-xl border border-white/10 self-start sm:self-auto">
           {(["ALL", "ACTIVE", "COMPLETED"] as const).map((status) => (
@@ -70,20 +97,6 @@ export default function CommandDeck({
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Category filter bar */}
-      <div className="flex flex-wrap items-center gap-2">
-        {(["ALL", "DAILY", "MAIN", "SIDE"] as const).map((category) => (
-          <button
-            key={category}
-            onClick={() => setCategoryFilter(category)}
-            className={`px-3 py-1 rounded-full text-[11px] font-mono border transition-all cursor-pointer ${categoryFilter === category ? "bg-purple-500/20 text-purple-200 border-purple-400/50 neon-glow-purple" : "bg-void-900/50 text-slate-400 border-white/10 hover:border-white/25"}`}
-          >
-            {" "}
-            {category === "ALL" ? "All Sectors" : `${category} Quests`}
-          </button>
-        ))}
       </div>
 
       {/* Quest cards list */}
