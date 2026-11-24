@@ -25,3 +25,8 @@ dist-ssr
 .env
 EOF
 .vs/
+.vscode/
+dist/
+build/
+.prisma/
+Thumbs.db
